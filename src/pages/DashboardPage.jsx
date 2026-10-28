@@ -156,6 +156,97 @@ export default function DashboardPage({
         />
       </div>
 
+      {/* Client Getting Started / Onboarding Guide (Displays when inventory is clean) */}
+      {metrics && metrics.totalActiveLots === 0 && (
+        <div className="bg-gradient-to-br from-amber-50 via-white to-red-50 p-6 rounded-3xl border-2 border-amber-200 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5 pb-4 border-b border-amber-200/80">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold uppercase tracking-wider mb-2">
+                <Flame className="w-3.5 h-3.5 text-red-700" />
+                <span>Client Onboarding • Ready For Live Data</span>
+              </div>
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                Welcome to Sri YMB Trading Company — Mirchi Inventory System
+              </h3>
+              <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                The database is clean with zero demo data. Follow these 3 simple setup steps to populate your company's actual physical stock and cold storage records:
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Step 1 */}
+            <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-red-300 transition">
+              <div>
+                <div className="w-8 h-8 rounded-xl bg-red-100 text-red-800 font-black text-sm flex items-center justify-center mb-3">
+                  1
+                </div>
+                <h4 className="font-extrabold text-sm text-slate-900">
+                  Register Cold Storages
+                </h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Add the warehouse facilities where your chillies are preserved (e.g. Guntur, Khammam, Byadgi) with manager contacts & quintal capacity.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenAddStorage}
+                className="mt-4 w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5 text-amber-300" />
+                <span>Add Cold Storage</span>
+              </button>
+            </div>
+
+            {/* Step 2 */}
+            <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-red-300 transition">
+              <div>
+                <div className="w-8 h-8 rounded-xl bg-red-700 text-white font-black text-sm flex items-center justify-center mb-3 shadow-xs">
+                  2
+                </div>
+                <h4 className="font-extrabold text-sm text-slate-900">
+                  Enter Red Chilli Lots
+                </h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Record each lot with its cultivar (Teja, Byadgi, Guntur Sannam, 273), weight in quintals/kg, supplier name, and purchase price.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenAddStock}
+                className="mt-4 w-full py-2 px-3 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-red-900/20"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Mirchi Stock Lot</span>
+              </button>
+            </div>
+
+            {/* Step 3 */}
+            <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-red-300 transition">
+              <div>
+                <div className="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black text-sm flex items-center justify-center mb-3">
+                  3
+                </div>
+                <h4 className="font-extrabold text-sm text-slate-900">
+                  Upload Mandi Bills
+                </h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Snap paper bills using your phone camera or upload PDFs and receipts to maintain an audit-ready digital archive linked to lots.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenUploadBill}
+                className="mt-4 w-full py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Upload Purchase Bill</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Chilli Variety Distribution Breakdown */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
         <div className="flex items-center justify-between mb-4">
@@ -163,6 +254,7 @@ export default function DashboardPage({
             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
               <Flame className="w-4 h-4 text-red-700" />
               Stock by Chilli Variety
+
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Available weight distribution across commercial red chilli cultivars
