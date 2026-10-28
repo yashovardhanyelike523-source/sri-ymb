@@ -848,9 +848,24 @@ export async function fetchPayments({ search, status, paymentMethod, startDate, 
 
   const { data, error } = await query;
   if (error) {
-    // If table doesn't exist yet, return empty list gracefully
+    // If table doesn't exist yet, return cached local payments
     if (error.code === 'PGRST205' || error.message?.includes('does not exist')) {
-      return [];
+      const local = JSON.parse(localStorage.getItem('sri_ymb_payments') || '[]');
+      let results = [...local];
+      if (status && status !== 'all') results = results.filter((p) => p.status === status);
+      if (paymentMethod && paymentMethod !== 'all') results = results.filter((p) => p.payment_method === paymentMethod);
+      if (startDate) results = results.filter((p) => p.payment_date >= startDate);
+      if (endDate) results = results.filter((p) => p.payment_date <= endDate);
+      if (search && search.trim()) {
+        const s = search.toLowerCase().trim();
+        results = results.filter(
+          (p) =>
+            p.payment_number?.toLowerCase().includes(s) ||
+            p.party_name?.toLowerCase().includes(s) ||
+            p.utr_number?.toLowerCase().includes(s)
+        );
+      }
+      return results;
     }
     throw error;
   }
@@ -876,7 +891,7 @@ export async function createPaymentRecord(paymentData, userEmail) {
     payment_number: paymentData.payment_number?.trim() || `PAY-YMB-${Date.now().toString().slice(-6)}`,
     payment_type: paymentData.payment_type || 'SALE_COLLECTION',
     amount: Number(paymentData.amount) || 0,
-    payment_method: paymentData.payment_method || 'UPI_QR',
+    payment_method: paymentData.payment_method || 'YOUPI_PG',
     upi_id: paymentData.upi_id?.trim() || null,
     utr_number: paymentData.utr_number?.trim() || null,
     gateway_payment_id: paymentData.gateway_payment_id?.trim() || null,
@@ -891,15 +906,36 @@ export async function createPaymentRecord(paymentData, userEmail) {
     created_by: userEmail || 'admin',
   };
 
-  const { data, error } = await supabase
-    .from('payments')
-    .insert([insertPayload])
-    .select(`*, lot:inventory_lots(id, lot_number)`)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('payments')
+      .insert([insertPayload])
+      .select(`*, lot:inventory_lots(id, lot_number)`)
+      .single();
 
-  if (error) throw error;
-  await logAuditEvent('RECORD_PAYMENT', 'payments', data.id, insertPayload, userEmail);
-  return data;
+    if (error) {
+      if (error.code === 'PGRST205' || error.message?.includes('does not exist')) {
+        // Fallback to local storage
+        const local = JSON.parse(localStorage.getItem('sri_ymb_payments') || '[]');
+        const record = { ...insertPayload, id: `local_${Date.now()}`, created_at: new Date().toISOString() };
+        local.unshift(record);
+        localStorage.setItem('sri_ymb_payments', JSON.stringify(local));
+        return record;
+      }
+      throw error;
+    }
+    await logAuditEvent('RECORD_PAYMENT', 'payments', data.id, insertPayload, userEmail);
+    return data;
+  } catch (err) {
+    if (err.code === 'PGRST205' || err.message?.includes('does not exist')) {
+      const local = JSON.parse(localStorage.getItem('sri_ymb_payments') || '[]');
+      const record = { ...insertPayload, id: `local_${Date.now()}`, created_at: new Date().toISOString() };
+      local.unshift(record);
+      localStorage.setItem('sri_ymb_payments', JSON.stringify(local));
+      return record;
+    }
+    throw err;
+  }
 }
 
 export async function updatePaymentStatus(id, { status, utrNumber }, userEmail) {
