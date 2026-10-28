@@ -11,6 +11,7 @@ import {
 } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { getCompanyPaymentSettings, saveCompanyPaymentSettings } from '../lib/api';
 import {
   Database,
   KeyRound,
@@ -20,9 +21,12 @@ import {
   Save,
   RefreshCw,
   Terminal,
+  QrCode,
+  CreditCard,
 } from 'lucide-react';
 
 export default function SettingsPage() {
+
   const { user, updatePassword } = useAuth();
 
   const { success, error: toastError } = useToast();
@@ -36,11 +40,21 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
+  // Payment & UPI Settings
+  const [paymentSettings, setPaymentSettings] = useState({
+    upiId: '',
+    payeeName: '',
+    razorpayKey: '',
+  });
+
   useEffect(() => {
     const current = getSupabaseCredentials();
     setCreds(current);
     checkConn();
+    const curPay = getCompanyPaymentSettings();
+    setPaymentSettings(curPay);
   }, []);
+
 
   const checkConn = async () => {
     setTestingConnection(true);
@@ -199,6 +213,102 @@ export default function SettingsPage() {
           </div>
         </form>
       </div>
+
+      {/* Payments & UPI Gateway Configuration */}
+      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+          <div className="p-2.5 rounded-xl bg-red-50 text-red-700">
+            <QrCode className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Payments & UPI Configuration
+            </h3>
+            <p className="text-xs text-slate-500">
+              Configure company UPI ID (VPA) for dynamic QR generation and optional Razorpay API keys
+            </p>
+          </div>
+        </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!paymentSettings.upiId.trim()) {
+              toastError('Company UPI ID cannot be empty.');
+              return;
+            }
+            saveCompanyPaymentSettings(paymentSettings);
+            success('Company UPI ID and Payment Settings saved successfully.');
+          }}
+          className="space-y-4 pt-1"
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                Company UPI ID / VPA *
+              </label>
+              <input
+                type="text"
+                required
+                value={paymentSettings.upiId}
+                onChange={(e) =>
+                  setPaymentSettings({ ...paymentSettings, upiId: e.target.value })
+                }
+                placeholder="e.g. sriymbtrading@okhdfcbank"
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-red-600 focus:outline-none"
+              />
+              <p className="text-[11px] text-slate-500 mt-1">
+                Payments made by scanning your QR code settle directly into your bank account with zero fees.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                Payee Legal / Trading Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={paymentSettings.payeeName}
+                onChange={(e) =>
+                  setPaymentSettings({ ...paymentSettings, payeeName: e.target.value })
+                }
+                placeholder="e.g. Sri YMB Trading Company"
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-red-600 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Razorpay Key ID (Optional — for Online Cards & NetBanking)
+            </label>
+            <input
+              type="text"
+              value={paymentSettings.razorpayKey}
+              onChange={(e) =>
+                setPaymentSettings({ ...paymentSettings, razorpayKey: e.target.value })
+              }
+              placeholder="e.g. rzp_test_... or rzp_live_..."
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono text-slate-900 focus:ring-2 focus:ring-red-600 focus:outline-none"
+            />
+            <p className="text-[11px] text-slate-500 mt-1">
+              Leave blank to use direct UPI QR only, or enter your Razorpay key for checkout popup.
+            </p>
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition active:scale-95"
+            >
+              <Save className="w-4 h-4 text-amber-300" />
+              <span>Save UPI & Gateway Settings</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
 
       {/* SQL Migration & Schema Setup Guide */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">

@@ -15,16 +15,18 @@ import {
   Receipt,
   ArrowLeftRight,
   Clock,
+  QrCode,
 } from 'lucide-react';
-
 
 export default function StockDetailsModal({
   isOpen,
   onClose,
   lot,
   onOpenRecordMovement,
+  onOpenCollectUpi,
 }) {
   const [movements, setMovements] = useState([]);
+
   const [loadingMovements, setLoadingMovements] = useState(false);
 
   useEffect(() => {
@@ -79,8 +81,22 @@ export default function StockDetailsModal({
             <div className="text-xs text-red-200">
               Rate: ₹{lot.purchase_rate} {lot.rate_unit === 'per_quintal' ? '/ Qtl' : '/ kg'}
             </div>
+            {onOpenCollectUpi && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenCollectUpi(lot, totalValue, lot.supplier_name);
+                }}
+                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs rounded-lg shadow-sm transition active:scale-95"
+              >
+                <QrCode className="w-3.5 h-3.5" />
+                <span>Collect UPI</span>
+              </button>
+            )}
           </div>
         </div>
+
 
         {/* Specifications Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 text-xs">

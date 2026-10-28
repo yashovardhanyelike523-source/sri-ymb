@@ -18,6 +18,7 @@ import InventoryPage from './pages/InventoryPage';
 import MovementsPage from './pages/MovementsPage';
 import ColdStoragePage from './pages/ColdStoragePage';
 import BillsPage from './pages/BillsPage';
+import PaymentsPage from './pages/PaymentsPage';
 import ReportsPage from './pages/ReportsPage';
 import AuditLogsPage from './pages/AuditLogsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -30,6 +31,8 @@ import RecordMovementModal from './components/movements/RecordMovementModal';
 import AddEditStorageModal from './components/storages/AddEditStorageModal';
 import UploadBillModal from './components/bills/UploadBillModal';
 import BillViewerModal from './components/bills/BillViewerModal';
+import CollectUpiModal from './components/payments/CollectUpiModal';
+
 
 export default function App() {
   const { user, loading, isConfigured } = useAuth();
@@ -50,6 +53,13 @@ export default function App() {
   const [storageModal, setStorageModal] = useState({ isOpen: false, storage: null });
   const [uploadBillOpen, setUploadBillOpen] = useState(false);
   const [viewBillModal, setViewBillModal] = useState({ isOpen: false, bill: null });
+  const [collectUpiModal, setCollectUpiModal] = useState({
+    isOpen: false,
+    lot: null,
+    amount: '',
+    party: '',
+  });
+
 
   // Load shared records when logged in
   useEffect(() => {
@@ -119,8 +129,10 @@ export default function App() {
                 onOpenRecordMovement={(lot) => setMovementModal({ isOpen: true, initialLot: lot || null })}
                 onOpenUploadBill={() => setUploadBillOpen(true)}
                 onOpenAddStorage={() => setStorageModal({ isOpen: true, storage: null })}
+                onOpenCollectUpi={() => setCollectUpiModal({ isOpen: true, lot: null, amount: '', party: '' })}
               />
             )}
+
 
             {currentTab === 'inventory' && (
               <InventoryPage
@@ -154,6 +166,20 @@ export default function App() {
                 key={`bills-${refreshKey}`}
                 onOpenUploadBill={() => setUploadBillOpen(true)}
                 onViewBill={(bill) => setViewBillModal({ isOpen: true, bill })}
+              />
+            )}
+
+            {currentTab === 'payments' && (
+              <PaymentsPage
+                key={`payments-${refreshKey}`}
+                onOpenCollectUpi={(lot, amount, party) =>
+                  setCollectUpiModal({
+                    isOpen: true,
+                    lot: lot || null,
+                    amount: amount || '',
+                    party: party || '',
+                  })
+                }
               />
             )}
 
@@ -196,7 +222,16 @@ export default function App() {
         onClose={() => setDetailsModal({ isOpen: false, lot: null })}
         lot={detailsModal.lot}
         onOpenRecordMovement={(lot) => setMovementModal({ isOpen: true, initialLot: lot })}
+        onOpenCollectUpi={(lot, amount, party) =>
+          setCollectUpiModal({
+            isOpen: true,
+            lot: lot || null,
+            amount: amount || '',
+            party: party || '',
+          })
+        }
       />
+
 
       {/* 4. Record Movement Modal */}
       <RecordMovementModal
@@ -231,6 +266,18 @@ export default function App() {
         onClose={() => setViewBillModal({ isOpen: false, bill: null })}
         bill={viewBillModal.bill}
       />
+
+      {/* 8. Dynamic UPI & Gateway Payment Modal */}
+      <CollectUpiModal
+        isOpen={collectUpiModal.isOpen}
+        onClose={() => setCollectUpiModal({ isOpen: false, lot: null, amount: '', party: '' })}
+        inventoryLots={inventoryLots}
+        initialLot={collectUpiModal.lot}
+        initialAmount={collectUpiModal.amount}
+        initialParty={collectUpiModal.party}
+        onSuccess={triggerRefresh}
+      />
     </div>
   );
 }
+

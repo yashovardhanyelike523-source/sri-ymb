@@ -9,6 +9,7 @@ import {
   ArrowLeftRight,
   Warehouse,
   Receipt,
+  QrCode,
   BarChart3,
   ShieldCheck,
   Settings,
@@ -17,16 +18,19 @@ import {
   FileSpreadsheet,
 } from 'lucide-react';
 
+
 export const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'inventory', label: 'Mirchi Inventory', icon: Layers },
   { id: 'movements', label: 'Stock Movements', icon: ArrowLeftRight },
   { id: 'storages', label: 'Cold Storage', icon: Warehouse },
   { id: 'bills', label: 'Purchase Bills', icon: Receipt },
+  { id: 'payments', label: 'Payments & UPI', icon: QrCode },
   { id: 'reports', label: 'Reports & Print', icon: BarChart3 },
   { id: 'audit', label: 'Audit Trail', icon: ShieldCheck },
   { id: 'settings', label: 'System Settings', icon: Settings },
 ];
+
 
 export default function Sidebar({ currentTab, onSelectTab, isOpen, onClose }) {
   return (

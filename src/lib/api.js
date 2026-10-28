@@ -713,3 +713,129 @@ export async function fetchDashboardMetrics() {
     recentBills: recentBills || [],
   };
 }
+
+// ==============================================================================
+// PAYMENTS & UPI API
+// ==============================================================================
+
+export function getCompanyPaymentSettings() {
+  const upiId = localStorage.getItem('sri_ymb_upi_id') || 'sriymbtrading@upi';
+  const payeeName = localStorage.getItem('sri_ymb_payee_name') || 'Sri YMB Trading Company';
+  const razorpayKey = localStorage.getItem('sri_ymb_razorpay_key') || '';
+  return { upiId, payeeName, razorpayKey };
+}
+
+export function saveCompanyPaymentSettings({ upiId, payeeName, razorpayKey }) {
+  if (upiId) localStorage.setItem('sri_ymb_upi_id', upiId.trim());
+  if (payeeName) localStorage.setItem('sri_ymb_payee_name', payeeName.trim());
+  if (razorpayKey !== undefined) localStorage.setItem('sri_ymb_razorpay_key', razorpayKey.trim());
+}
+
+/**
+ * Builds standard NPCI UPI Payment URI
+ * e.g. upi://pay?pa=...&pn=...&am=...&cu=INR&tn=...
+ */
+export function buildUpiPaymentUri({ upiId, payeeName, amount, transactionNote, referenceId }) {
+  const params = new URLSearchParams();
+  params.set('pa', upiId);
+  params.set('pn', payeeName);
+  if (amount && Number(amount) > 0) {
+    params.set('am', Number(amount).toFixed(2));
+  }
+  params.set('cu', 'INR');
+  if (transactionNote) {
+    params.set('tn', transactionNote);
+  }
+  if (referenceId) {
+    params.set('tr', referenceId);
+  }
+  return `upi://pay?${params.toString()}`;
+}
+
+export async function fetchPayments({ search, status, paymentMethod, startDate, endDate } = {}) {
+  let query = supabase
+    .from('payments')
+    .select(`
+      *,
+      lot:inventory_lots (id, lot_number, item_name, chilli_variety)
+    `)
+    .order('created_at', { ascending: false });
+
+  if (status && status !== 'all') query = query.eq('status', status);
+  if (paymentMethod && paymentMethod !== 'all') query = query.eq('payment_method', paymentMethod);
+  if (startDate) query = query.gte('payment_date', startDate);
+  if (endDate) query = query.lte('payment_date', endDate);
+
+  const { data, error } = await query;
+  if (error) {
+    // If table doesn't exist yet, return empty list gracefully
+    if (error.code === 'PGRST205' || error.message?.includes('does not exist')) {
+      return [];
+    }
+    throw error;
+  }
+
+  let results = data || [];
+  if (search && search.trim()) {
+    const s = search.toLowerCase().trim();
+    results = results.filter(
+      (p) =>
+        p.payment_number?.toLowerCase().includes(s) ||
+        p.party_name?.toLowerCase().includes(s) ||
+        p.utr_number?.toLowerCase().includes(s) ||
+        p.bill_reference?.toLowerCase().includes(s) ||
+        p.lot?.lot_number?.toLowerCase().includes(s)
+    );
+  }
+
+  return results;
+}
+
+export async function createPaymentRecord(paymentData, userEmail) {
+  const insertPayload = {
+    payment_number: paymentData.payment_number?.trim() || `PAY-YMB-${Date.now().toString().slice(-6)}`,
+    payment_type: paymentData.payment_type || 'SALE_COLLECTION',
+    amount: Number(paymentData.amount) || 0,
+    payment_method: paymentData.payment_method || 'UPI_QR',
+    upi_id: paymentData.upi_id?.trim() || null,
+    utr_number: paymentData.utr_number?.trim() || null,
+    gateway_payment_id: paymentData.gateway_payment_id?.trim() || null,
+    gateway_order_id: paymentData.gateway_order_id?.trim() || null,
+    status: paymentData.status || 'COMPLETED',
+    lot_id: paymentData.lot_id || null,
+    bill_reference: paymentData.bill_reference?.trim() || null,
+    party_name: paymentData.party_name.trim(),
+    party_phone: paymentData.party_phone?.trim() || null,
+    payment_date: paymentData.payment_date || new Date().toISOString().split('T')[0],
+    remarks: paymentData.remarks?.trim() || null,
+    created_by: userEmail || 'admin',
+  };
+
+  const { data, error } = await supabase
+    .from('payments')
+    .insert([insertPayload])
+    .select(`*, lot:inventory_lots(id, lot_number)`)
+    .single();
+
+  if (error) throw error;
+  await logAuditEvent('RECORD_PAYMENT', 'payments', data.id, insertPayload, userEmail);
+  return data;
+}
+
+export async function updatePaymentStatus(id, { status, utrNumber }, userEmail) {
+  const { data, error } = await supabase
+    .from('payments')
+    .update({
+      status,
+      utr_number: utrNumber || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  await logAuditEvent('UPDATE_PAYMENT_STATUS', 'payments', id, { status, utrNumber }, userEmail);
+  return data;
+}
+
