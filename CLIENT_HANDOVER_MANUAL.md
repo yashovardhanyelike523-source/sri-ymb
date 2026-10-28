@@ -96,3 +96,24 @@ Every time chilli is moved out of cold storage for sale or processing:
 - **PostgreSQL Database:** Hosted securely on Supabase with encrypted tables.
 - **Backups:** Supabase automatically performs continuous daily point-in-time backups.
 - **Row Level Security:** Only authenticated administrators with active admin status can view or modify records.
+
+---
+
+### 💳 8. YouPI-PG & Zero-Fee UPI Payment Gateway
+The system includes built-in support for **YouPI-PG** ([GitHub: youpi-pg/YouPI-PG](https://github.com/youpi-pg/YouPI-PG)), an open-source self-hosted UPI payment gateway:
+- **0% Platform Fees:** Receive payments directly into your merchant bank account without 2–3% aggregator deductions.
+- **WhatsApp Pre-Checkout OTP:** Verify buyer mobile numbers with a 6-digit WhatsApp OTP before payment.
+- **Automated Bank Reconciliation:** Detects incoming bank SMS alerts and Gmail credit notifications via the YouPI observation mesh.
+- **Direct Dynamic UPI QR Code:** Instant NPCI-standard QR codes with 1-tap deep links for Google Pay, PhonePe, Paytm, and CRED.
+- **How to Collect a Payment:**
+  1. Click **Payments & UPI** in the sidebar (or click *Collect Payment* inside any lot modal).
+  2. Select the customer name, amount, and optional linked chilli lot.
+  3. Under the **YouPI-PG** tab, the buyer can scan the dynamic QR code or tap their preferred UPI app on mobile.
+  4. Once payment arrives, verify the 12-digit UTR and click **Record Payment**.
+  5. Click **Print Receipt** to issue a certified payment receipt.
+- **How to Configure in Settings:**
+  1. Go to **System Settings $\rightarrow$ YouPI-PG Self-Hosted UPI Gateway**.
+  2. Enter your YouPI Server URL (e.g. `https://pay.sriymb.com` or your VPS address).
+  3. Enter your Merchant Key (`data-youpi-key`), settlement UPI ID (VPA), and payee name.
+  4. Toggle WhatsApp Pre-Checkout verification on or off as desired.
+

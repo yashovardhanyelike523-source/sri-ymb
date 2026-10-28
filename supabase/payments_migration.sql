@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.payments (
     payment_number TEXT NOT NULL UNIQUE,
     payment_type TEXT NOT NULL DEFAULT 'SALE_COLLECTION' CHECK (payment_type IN ('SALE_COLLECTION', 'PURCHASE_PAYMENT', 'STORAGE_RENTAL', 'ADVANCE', 'OTHER')),
     amount NUMERIC(12, 2) NOT NULL CHECK (amount > 0),
-    payment_method TEXT NOT NULL CHECK (payment_method IN ('UPI_QR', 'UPI_APP', 'RAZORPAY', 'BANK_TRANSFER', 'CASH')),
+    payment_method TEXT NOT NULL CHECK (payment_method IN ('YOUPI_PG', 'UPI_QR', 'UPI_APP', 'RAZORPAY', 'BANK_TRANSFER', 'CASH')),
     upi_id TEXT,
     utr_number TEXT,
     gateway_payment_id TEXT,

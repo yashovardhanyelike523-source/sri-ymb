@@ -22,6 +22,7 @@ import {
   Layers,
   Flame,
   FileSpreadsheet,
+  Zap,
 } from 'lucide-react';
 
 export default function PaymentsPage({ onOpenCollectUpi }) {
@@ -85,7 +86,11 @@ export default function PaymentsPage({ onOpenCollectUpi }) {
       if (p.status === 'COMPLETED') {
         const amt = Number(p.amount) || 0;
         totalCollected += amt;
-        if (p.payment_method === 'UPI_QR' || p.payment_method === 'UPI_APP') {
+        if (
+          p.payment_method === 'YOUPI_PG' ||
+          p.payment_method === 'UPI_QR' ||
+          p.payment_method === 'UPI_APP'
+        ) {
           upiCollected += amt;
         } else if (p.payment_method === 'RAZORPAY') {
           gatewayCollected += amt;
@@ -249,6 +254,7 @@ export default function PaymentsPage({ onOpenCollectUpi }) {
               className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-600 bg-white"
             >
               <option value="all">All Payment Methods</option>
+              <option value="YOUPI_PG">YouPI-PG Gateway (0% Fee)</option>
               <option value="UPI_QR">Dynamic UPI QR</option>
               <option value="UPI_APP">UPI Apps (GPay/PhonePe)</option>
               <option value="RAZORPAY">Razorpay Gateway</option>
@@ -326,9 +332,16 @@ export default function PaymentsPage({ onOpenCollectUpi }) {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-800 border border-slate-200">
-                        {p.payment_method.replace('_', ' ')}
-                      </span>
+                      {p.payment_method === 'YOUPI_PG' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-purple-100 text-purple-900 border border-purple-200">
+                          <Zap className="w-3 h-3 text-purple-700" />
+                          <span>YouPI-PG</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-800 border border-slate-200">
+                          {p.payment_method.replace('_', ' ')}
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-4 font-mono text-[11px] text-slate-600">
                       {p.utr_number || p.gateway_payment_id || '—'}
