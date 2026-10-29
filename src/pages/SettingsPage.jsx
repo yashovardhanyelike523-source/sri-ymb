@@ -14,7 +14,6 @@ import { useToast } from '../context/ToastContext';
 import {
   getCompanyPaymentSettings,
   saveCompanyPaymentSettings,
-  pingYoupiServer,
 } from '../lib/api';
 import {
   Database,
@@ -26,12 +25,9 @@ import {
   RefreshCw,
   Terminal,
   QrCode,
-  CreditCard,
-  Zap,
-  ExternalLink,
-  MessageSquare,
-  Globe,
+  BadgeCheck,
   ShieldCheck,
+  Smartphone,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -49,19 +45,12 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
-  // Payment & UPI Settings (including YouPI-PG)
+  // Payment & UPI Settings
   const [paymentSettings, setPaymentSettings] = useState({
-    upiId: '',
-    payeeName: '',
-    razorpayKey: '',
-    youpiServerUrl: '',
-    youpiMerchantKey: '',
-    youpiEnableWhatsAppOtp: true,
-    youpiWebhookSecret: '',
+    upiId: 'yelikeyasho@ptyes',
+    payeeName: 'Yelike Yasho Vardhan Venkata Soma S',
+    scannerImage: '/images/upi-scanner.png',
   });
-
-  const [testingYoupi, setTestingYoupi] = useState(false);
-  const [youpiStatus, setYoupiStatus] = useState(null);
 
   useEffect(() => {
     const current = getSupabaseCredentials();
@@ -110,22 +99,6 @@ export default function SettingsPage() {
       toastError(err.message || 'Failed to update password.');
     } finally {
       setUpdatingPassword(false);
-    }
-  };
-
-  const handleTestYoupi = async () => {
-    if (!paymentSettings.youpiServerUrl?.trim()) {
-      toastError('Please enter a YouPI Server URL to test.');
-      return;
-    }
-    setTestingYoupi(true);
-    const res = await pingYoupiServer(paymentSettings.youpiServerUrl);
-    setYoupiStatus(res);
-    setTestingYoupi(false);
-    if (res.ok) {
-      success('YouPI-PG Gateway server is reachable and online!');
-    } else {
-      toastError(`YouPI-PG server check: ${res.error || 'Connection failed'}. You can still use Direct UPI QR mode.`);
     }
   };
 
@@ -246,215 +219,108 @@ export default function SettingsPage() {
         </form>
       </div>
 
-      {/* YouPI-PG Gateway Configuration */}
+      {/* Official Paytm UPI Scanner Configuration */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
           <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-xl bg-purple-50 text-purple-700">
-              <Zap className="w-5 h-5" />
+            <div className="p-2.5 rounded-xl bg-sky-50 text-sky-700">
+              <QrCode className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-slate-900">
-                  YouPI-PG Self-Hosted UPI Gateway
+                  Paytm UPI Scanner & Settlement Payee
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide uppercase bg-emerald-100 text-emerald-800">
-                  0% Gateway Fees
+                  Zero Platform Fees
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide uppercase bg-purple-100 text-purple-800">
-                  WhatsApp OTP
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide uppercase bg-sky-100 text-sky-800">
+                  Paytm Verified
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Universal JavaScript checkout integration with WhatsApp phone verification and automated bank SMS / Gmail observation
+                Official UPI scanner card for direct bank collections via Paytm, PhonePe, Google Pay, and BHIM
               </p>
             </div>
           </div>
-
-          <a
-            href="https://github.com/youpi-pg/YouPI-PG"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-purple-700 hover:text-purple-900 font-bold inline-flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-xl transition"
-          >
-            <span>GitHub Docs</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
         </div>
 
-        <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-100 text-xs text-purple-950 space-y-1.5">
-          <div className="flex items-center gap-1.5 font-bold text-purple-900">
-            <ShieldCheck className="w-4 h-4 text-purple-700" />
-            <span>Why YouPI-PG for Sri YMB Chilli Trades?</span>
+        {/* Live Scanner Standee Preview & Identity */}
+        <div className="p-4 bg-sky-50/50 rounded-2xl border border-sky-100 flex flex-col sm:flex-row items-center gap-5">
+          <div className="w-36 h-48 rounded-xl overflow-hidden bg-white shadow-md border-2 border-white ring-2 ring-sky-200 shrink-0">
+            <img
+              src="/images/upi-scanner.png"
+              alt="Paytm Scanner Preview"
+              className="w-full h-full object-cover"
+            />
           </div>
-          <p className="text-[11px] text-purple-800 leading-relaxed">
-            Eliminates traditional 2–3% aggregator fees on large agricultural chilli transactions. Customers pay directly into your merchant bank account via any UPI app with automatic UTR reconciliation.
-          </p>
+
+          <div className="space-y-2 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start gap-1.5">
+              <h4 className="text-sm font-black text-slate-900">
+                {paymentSettings.payeeName}
+              </h4>
+              <BadgeCheck className="w-4 h-4 text-sky-600 fill-sky-600 text-white shrink-0" />
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white border border-sky-200 font-mono text-xs font-bold text-sky-900">
+              <span>UPI ID:</span>
+              <span className="text-sky-700">{paymentSettings.upiId}</span>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed max-w-md">
+              This official scanner card is displayed to buyers when recording stock dispatches and collections. Every payment settles directly into your bank account with zero mediator fees.
+            </p>
+          </div>
         </div>
 
         <form
           onSubmit={(e) => {
             e.preventDefault();
             if (!paymentSettings.upiId.trim()) {
-              toastError('Company UPI ID cannot be empty.');
+              toastError('UPI ID cannot be empty.');
               return;
             }
             saveCompanyPaymentSettings(paymentSettings);
-            success('YouPI-PG & UPI Payment Settings saved successfully.');
+            success('UPI Scanner & Payee Settings saved successfully.');
           }}
           className="space-y-4 pt-1"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                YouPI Gateway Server URL
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  value={paymentSettings.youpiServerUrl || ''}
-                  onChange={(e) =>
-                    setPaymentSettings({ ...paymentSettings, youpiServerUrl: e.target.value })
-                  }
-                  placeholder="https://pay.sriymb.com"
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono text-slate-900 focus:ring-2 focus:ring-purple-600 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleTestYoupi}
-                  disabled={testingYoupi}
-                  className="px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${testingYoupi ? 'animate-spin' : ''}`} />
-                  <span>Test Ping</span>
-                </button>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                URL of your self-hosted YouPI-PG Node.js server. If offline, the app seamlessly uses direct UPI QR.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Merchant Public Key (<code className="lowercase">data-youpi-key</code>)
+                Settlement UPI ID / VPA *
               </label>
               <input
                 type="text"
-                value={paymentSettings.youpiMerchantKey || ''}
+                required
+                value={paymentSettings.upiId}
                 onChange={(e) =>
-                  setPaymentSettings({ ...paymentSettings, youpiMerchantKey: e.target.value })
+                  setPaymentSettings({ ...paymentSettings, upiId: e.target.value })
                 }
-                placeholder="e.g. ymb_live_pub_key_9921"
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono text-slate-900 focus:ring-2 focus:ring-purple-600 focus:outline-none"
+                placeholder="yelikeyasho@ptyes"
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-sky-600 focus:outline-none"
               />
               <p className="text-[11px] text-slate-500 mt-1">
-                Your YouPI gateway merchant identifier passed to the universal checkout script.
+                All QR scans and mobile UPI deep links route payments directly to this receiving VPA.
               </p>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Webhook / HMAC Secret Key (Optional)
+                Payee Legal / Account Name *
               </label>
               <input
-                type="password"
-                value={paymentSettings.youpiWebhookSecret || ''}
+                type="text"
+                required
+                value={paymentSettings.payeeName}
                 onChange={(e) =>
-                  setPaymentSettings({ ...paymentSettings, youpiWebhookSecret: e.target.value })
+                  setPaymentSettings({ ...paymentSettings, payeeName: e.target.value })
                 }
-                placeholder="Enter secret for signing observer callbacks"
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono text-slate-900 focus:ring-2 focus:ring-purple-600 focus:outline-none"
+                placeholder="Yelike Yasho Vardhan Venkata Soma S"
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-sky-600 focus:outline-none"
               />
             </div>
-
-            <div className="flex items-center pt-5">
-              <label className="relative flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={paymentSettings.youpiEnableWhatsAppOtp !== false}
-                  onChange={(e) =>
-                    setPaymentSettings({
-                      ...paymentSettings,
-                      youpiEnableWhatsAppOtp: e.target.checked,
-                    })
-                  }
-                  className="w-4 h-4 text-purple-600 rounded border-slate-300 focus:ring-purple-500"
-                />
-                <div>
-                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>WhatsApp Pre-Checkout OTP (Berry Protocol)</span>
-                  </span>
-                  <p className="text-[11px] text-slate-500">
-                    Verify buyer phone numbers with 6-digit WhatsApp OTP to prevent spoofing
-                  </p>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          {/* Direct UPI and Payee Details */}
-          <div className="pt-3 border-t border-slate-100">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-3">
-              Direct UPI Settling Account & Payee Information
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Settlement UPI ID / VPA *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={paymentSettings.upiId}
-                  onChange={(e) =>
-                    setPaymentSettings({ ...paymentSettings, upiId: e.target.value })
-                  }
-                  placeholder="e.g. sriymbtrading@okhdfcbank"
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-red-600 focus:outline-none"
-                />
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Direct NPCI bank account VPA where all customer collections settle instantly.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Payee Legal / Trading Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={paymentSettings.payeeName}
-                  onChange={(e) =>
-                    setPaymentSettings({ ...paymentSettings, payeeName: e.target.value })
-                  }
-                  placeholder="e.g. Sri YMB Trading Company"
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-red-600 focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Optional Razorpay */}
-          <div className="pt-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Razorpay Key ID (Optional — for Online Credit/Debit Cards & NetBanking)
-            </label>
-            <input
-              type="text"
-              value={paymentSettings.razorpayKey || ''}
-              onChange={(e) =>
-                setPaymentSettings({ ...paymentSettings, razorpayKey: e.target.value })
-              }
-              placeholder="e.g. rzp_test_... or rzp_live_..."
-              className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono text-slate-900 focus:ring-2 focus:ring-purple-600 focus:outline-none"
-            />
-            <p className="text-[11px] text-slate-500 mt-1">
-              Optional fallback if client requests card/netbanking payments instead of UPI.
-            </p>
           </div>
 
           <div className="flex justify-end pt-2">
@@ -463,7 +329,7 @@ export default function SettingsPage() {
               className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition active:scale-95"
             >
               <Save className="w-4 h-4 text-amber-300" />
-              <span>Save YouPI-PG & Payment Settings</span>
+              <span>Save UPI Scanner Settings</span>
             </button>
           </div>
         </form>

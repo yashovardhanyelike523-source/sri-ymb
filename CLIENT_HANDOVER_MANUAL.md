@@ -99,21 +99,23 @@ Every time chilli is moved out of cold storage for sale or processing:
 
 ---
 
-### 💳 8. YouPI-PG & Zero-Fee UPI Payment Gateway
-The system includes built-in support for **YouPI-PG** ([GitHub: youpi-pg/YouPI-PG](https://github.com/youpi-pg/YouPI-PG)), an open-source self-hosted UPI payment gateway:
-- **0% Platform Fees:** Receive payments directly into your merchant bank account without 2–3% aggregator deductions.
-- **WhatsApp Pre-Checkout OTP:** Verify buyer mobile numbers with a 6-digit WhatsApp OTP before payment.
-- **Automated Bank Reconciliation:** Detects incoming bank SMS alerts and Gmail credit notifications via the YouPI observation mesh.
-- **Direct Dynamic UPI QR Code:** Instant NPCI-standard QR codes with 1-tap deep links for Google Pay, PhonePe, Paytm, and CRED.
-- **How to Collect a Payment:**
-  1. Click **Payments & UPI** in the sidebar (or click *Collect Payment* inside any lot modal).
-  2. Select the customer name, amount, and optional linked chilli lot.
-  3. Under the **YouPI-PG** tab, the buyer can scan the dynamic QR code or tap their preferred UPI app on mobile.
-  4. Once payment arrives, verify the 12-digit UTR and click **Record Payment**.
-  5. Click **Print Receipt** to issue a certified payment receipt.
-- **How to Configure in Settings:**
-  1. Go to **System Settings $\rightarrow$ YouPI-PG Self-Hosted UPI Gateway**.
-  2. Enter your YouPI Server URL (e.g. `https://pay.sriymb.com` or your VPS address).
-  3. Enter your Merchant Key (`data-youpi-key`), settlement UPI ID (VPA), and payee name.
-  4. Toggle WhatsApp Pre-Checkout verification on or off as desired.
+### 💳 8. Official Paytm UPI Scanner & Direct Bank Settlement
+The application features direct zero-fee UPI settlement using your official Paytm QR Scanner:
+- **Verified Payee:** **Yelike Yasho Vardhan Venkata Soma S**
+- **Settlement UPI ID:** **`yelikeyasho@ptyes`**
+- **Zero Intermediary Fees:** 100% of the funds go straight into your bank account via standard NPCI UPI rails.
+- **Dual Display Modes:**
+  1. **Official Paytm Standee Scanner:** Displays your official verified QR standee image (`/images/upi-scanner.png`).
+  2. **Pre-Filled Dynamic Amount QR:** Generates a vector QR with the exact bill amount already embedded so customers don't have to type the amount manually.
+- **Mobile 1-Tap Intent:** Quick buttons to open **Paytm**, **PhonePe**, **Google Pay**, or **BHIM** directly on smartphones and tablets.
+- **How to Collect & Record a Payment:**
+  1. Click **Payments & UPI** in the sidebar (or click *Collect UPI* on any lot details screen).
+  2. Enter the customer / party name and the amount to collect.
+  3. Show the QR scanner or tap the mobile app button.
+  4. Once payment arrives in your bank/Paytm app, enter the 12-digit UTR number and click **Record Payment**.
+  5. Click **Print Receipt** to issue a formal certified receipt.
+- **How to Update Details:**
+  1. Go to **System Settings $\rightarrow$ Paytm UPI Scanner & Settlement Payee**.
+  2. Verify or update the UPI ID (`yelikeyasho@ptyes`) and Payee Name as needed.
+
 

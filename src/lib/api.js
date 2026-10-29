@@ -719,96 +719,21 @@ export async function fetchDashboardMetrics() {
 // ==============================================================================
 
 export function getCompanyPaymentSettings() {
-  const upiId = localStorage.getItem('sri_ymb_upi_id') || 'sriymbtrading@upi';
-  const payeeName = localStorage.getItem('sri_ymb_payee_name') || 'Sri YMB Trading Company';
-  const razorpayKey = localStorage.getItem('sri_ymb_razorpay_key') || '';
-  
-  // YouPI-PG Gateway Settings
-  const youpiServerUrl = localStorage.getItem('sri_ymb_youpi_url') || 'https://pay.sriymb.com';
-  const youpiMerchantKey = localStorage.getItem('sri_ymb_youpi_key') || 'ymb_live_pub_key_9921';
-  const youpiEnableWhatsAppOtp = localStorage.getItem('sri_ymb_youpi_wa_otp') !== 'false';
-  const youpiWebhookSecret = localStorage.getItem('sri_ymb_youpi_secret') || '';
+  const upiId = localStorage.getItem('sri_ymb_upi_id') || 'yelikeyasho@ptyes';
+  const payeeName = localStorage.getItem('sri_ymb_payee_name') || 'Yelike Yasho Vardhan Venkata Soma S';
+  const scannerImage = localStorage.getItem('sri_ymb_scanner_image') || '/images/upi-scanner.png';
 
   return {
     upiId,
     payeeName,
-    razorpayKey,
-    youpiServerUrl,
-    youpiMerchantKey,
-    youpiEnableWhatsAppOtp,
-    youpiWebhookSecret,
+    scannerImage,
   };
 }
 
-export function saveCompanyPaymentSettings({
-  upiId,
-  payeeName,
-  razorpayKey,
-  youpiServerUrl,
-  youpiMerchantKey,
-  youpiEnableWhatsAppOtp,
-  youpiWebhookSecret,
-}) {
+export function saveCompanyPaymentSettings({ upiId, payeeName, scannerImage }) {
   if (upiId) localStorage.setItem('sri_ymb_upi_id', upiId.trim());
   if (payeeName) localStorage.setItem('sri_ymb_payee_name', payeeName.trim());
-  if (razorpayKey !== undefined) localStorage.setItem('sri_ymb_razorpay_key', razorpayKey.trim());
-  if (youpiServerUrl !== undefined) localStorage.setItem('sri_ymb_youpi_url', youpiServerUrl.trim());
-  if (youpiMerchantKey !== undefined) localStorage.setItem('sri_ymb_youpi_key', youpiMerchantKey.trim());
-  if (youpiEnableWhatsAppOtp !== undefined) {
-    localStorage.setItem('sri_ymb_youpi_wa_otp', youpiEnableWhatsAppOtp ? 'true' : 'false');
-  }
-  if (youpiWebhookSecret !== undefined) localStorage.setItem('sri_ymb_youpi_secret', youpiWebhookSecret.trim());
-}
-
-/**
- * Dynamically loads the YouPI-PG JavaScript SDK into document
- * e.g. <script src="{serverUrl}/youpi.js" data-youpi-key="{merchantKey}" data-currency="INR"></script>
- */
-export function loadYoupiScript(serverUrl, merchantKey) {
-  return new Promise((resolve) => {
-    if (window.Youpi) {
-      resolve(true);
-      return;
-    }
-    const cleanUrl = (serverUrl || 'https://pay.sriymb.com').replace(/\/$/, '');
-    const scriptSrc = `${cleanUrl}/youpi.js`;
-    
-    // Check if script element already exists
-    const existing = document.querySelector(`script[src*="youpi.js"]`);
-    if (existing) {
-      resolve(true);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = scriptSrc;
-    script.setAttribute('data-youpi-key', merchantKey || 'ymb_live_pub_key_9921');
-    script.setAttribute('data-currency', 'INR');
-    script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => {
-      console.warn(`[YouPI-PG] Failed to load SDK from ${scriptSrc}. Fallback mode active.`);
-      resolve(false);
-    };
-    document.head.appendChild(script);
-  });
-}
-
-/**
- * Health check ping to YouPI-PG server
- */
-export async function pingYoupiServer(serverUrl) {
-  if (!serverUrl) return { ok: false, error: 'No server URL provided' };
-  try {
-    const cleanUrl = serverUrl.replace(/\/$/, '');
-    const res = await fetch(`${cleanUrl}/health`, { method: 'GET', mode: 'cors' }).catch(() => null);
-    if (res && (res.ok || res.status === 200 || res.status === 404)) {
-      return { ok: true, status: res.status };
-    }
-    return { ok: false, error: 'Server unreachable or CORS blocked' };
-  } catch (err) {
-    return { ok: false, error: err.message };
-  }
+  if (scannerImage) localStorage.setItem('sri_ymb_scanner_image', scannerImage.trim());
 }
 
 /**
@@ -891,7 +816,7 @@ export async function createPaymentRecord(paymentData, userEmail) {
     payment_number: paymentData.payment_number?.trim() || `PAY-YMB-${Date.now().toString().slice(-6)}`,
     payment_type: paymentData.payment_type || 'SALE_COLLECTION',
     amount: Number(paymentData.amount) || 0,
-    payment_method: paymentData.payment_method || 'YOUPI_PG',
+    payment_method: paymentData.payment_method || 'UPI_SCANNER',
     upi_id: paymentData.upi_id?.trim() || null,
     utr_number: paymentData.utr_number?.trim() || null,
     gateway_payment_id: paymentData.gateway_payment_id?.trim() || null,

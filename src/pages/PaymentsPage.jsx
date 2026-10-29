@@ -80,20 +80,21 @@ export default function PaymentsPage({ onOpenCollectUpi }) {
   const summary = useMemo(() => {
     let totalCollected = 0;
     let upiCollected = 0;
-    let gatewayCollected = 0;
+    let bankCashCollected = 0;
 
     payments.forEach((p) => {
       if (p.status === 'COMPLETED') {
         const amt = Number(p.amount) || 0;
         totalCollected += amt;
         if (
-          p.payment_method === 'YOUPI_PG' ||
+          p.payment_method === 'UPI_SCANNER' ||
           p.payment_method === 'UPI_QR' ||
-          p.payment_method === 'UPI_APP'
+          p.payment_method === 'UPI_APP' ||
+          p.payment_method === 'YOUPI_PG'
         ) {
           upiCollected += amt;
-        } else if (p.payment_method === 'RAZORPAY') {
-          gatewayCollected += amt;
+        } else {
+          bankCashCollected += amt;
         }
       }
     });
@@ -101,7 +102,7 @@ export default function PaymentsPage({ onOpenCollectUpi }) {
     return {
       totalCollected: Number(totalCollected.toFixed(2)),
       upiCollected: Number(upiCollected.toFixed(2)),
-      gatewayCollected: Number(gatewayCollected.toFixed(2)),
+      bankCashCollected: Number(bankCashCollected.toFixed(2)),
       totalCount: payments.length,
     };
   }, [payments]);
@@ -208,27 +209,27 @@ export default function PaymentsPage({ onOpenCollectUpi }) {
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-            <span>UPI QR / App Collections</span>
-            <QrCode className="w-4 h-4 text-red-700" />
+            <span>Paytm UPI Collections</span>
+            <QrCode className="w-4 h-4 text-sky-600" />
           </div>
           <div className="text-2xl font-black text-slate-900 mt-2">
             {formatINR(summary.upiCollected)}
           </div>
           <div className="text-xs text-slate-400 mt-0.5">
-            GPay, PhonePe, Paytm (Zero merchant fees)
+            Scan & Pay via yelikeyasho@ptyes
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-            <span>Gateway Online Checkout</span>
-            <CreditCard className="w-4 h-4 text-amber-600" />
+            <span>Bank & Cash Collections</span>
+            <CreditCard className="w-4 h-4 text-slate-600" />
           </div>
           <div className="text-2xl font-black text-slate-900 mt-2">
-            {formatINR(summary.gatewayCollected)}
+            {formatINR(summary.bankCashCollected)}
           </div>
           <div className="text-xs text-slate-400 mt-0.5">
-            NetBanking & Cards via Razorpay
+            Direct NEFT/RTGS & Cash at Mandi
           </div>
         </div>
       </div>
@@ -243,7 +244,7 @@ export default function PaymentsPage({ onOpenCollectUpi }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search receipt #, buyer, UTR #..."
-              className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-600 bg-slate-50/50 hover:bg-white"
+              className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-slate-50/50 hover:bg-white"
             />
           </div>
 
@@ -251,13 +252,12 @@ export default function PaymentsPage({ onOpenCollectUpi }) {
             <select
               value={methodFilter}
               onChange={(e) => setMethodFilter(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-600 bg-white"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-white"
             >
               <option value="all">All Payment Methods</option>
-              <option value="YOUPI_PG">YouPI-PG Gateway (0% Fee)</option>
+              <option value="UPI_SCANNER">Paytm UPI Scanner</option>
               <option value="UPI_QR">Dynamic UPI QR</option>
               <option value="UPI_APP">UPI Apps (GPay/PhonePe)</option>
-              <option value="RAZORPAY">Razorpay Gateway</option>
               <option value="BANK_TRANSFER">Bank NEFT/RTGS</option>
               <option value="CASH">Cash</option>
             </select>
@@ -332,10 +332,15 @@ export default function PaymentsPage({ onOpenCollectUpi }) {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      {p.payment_method === 'YOUPI_PG' ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-purple-100 text-purple-900 border border-purple-200">
-                          <Zap className="w-3 h-3 text-purple-700" />
-                          <span>YouPI-PG</span>
+                      {p.payment_method === 'UPI_SCANNER' || p.payment_method === 'YOUPI_PG' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-sky-100 text-sky-900 border border-sky-200">
+                          <QrCode className="w-3 h-3 text-sky-600" />
+                          <span>Paytm UPI</span>
+                        </span>
+                      ) : p.payment_method === 'UPI_QR' || p.payment_method === 'UPI_APP' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-50 text-indigo-900 border border-indigo-200">
+                          <Smartphone className="w-3 h-3 text-indigo-600" />
+                          <span>UPI App</span>
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-800 border border-slate-200">
