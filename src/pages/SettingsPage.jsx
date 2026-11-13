@@ -12,10 +12,6 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import {
-  getCompanyPaymentSettings,
-  saveCompanyPaymentSettings,
-} from '../lib/api';
-import {
   Database,
   KeyRound,
   CheckCircle2,
@@ -24,10 +20,7 @@ import {
   Save,
   RefreshCw,
   Terminal,
-  QrCode,
-  BadgeCheck,
   ShieldCheck,
-  Smartphone,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -45,19 +38,10 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
-  // Payment & UPI Settings
-  const [paymentSettings, setPaymentSettings] = useState({
-    upiId: 'yelikeyasho@ptyes',
-    payeeName: 'Yelike Yasho Vardhan Venkata Soma S',
-    scannerImage: '/images/upi-scanner.png',
-  });
-
   useEffect(() => {
     const current = getSupabaseCredentials();
     setCreds(current);
     checkConn();
-    const curPay = getCompanyPaymentSettings();
-    setPaymentSettings(curPay);
   }, []);
 
 
@@ -218,123 +202,6 @@ export default function SettingsPage() {
           </div>
         </form>
       </div>
-
-      {/* Official Paytm UPI Scanner Configuration */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-xl bg-sky-50 text-sky-700">
-              <QrCode className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-slate-900">
-                  Paytm UPI Scanner & Settlement Payee
-                </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide uppercase bg-emerald-100 text-emerald-800">
-                  Zero Platform Fees
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide uppercase bg-sky-100 text-sky-800">
-                  Paytm Verified
-                </span>
-              </div>
-              <p className="text-xs text-slate-500">
-                Official UPI scanner card for direct bank collections via Paytm, PhonePe, Google Pay, and BHIM
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Scanner Standee Preview & Identity */}
-        <div className="p-4 bg-sky-50/50 rounded-2xl border border-sky-100 flex flex-col sm:flex-row items-center gap-5">
-          <div className="w-36 h-48 rounded-xl overflow-hidden bg-white shadow-md border-2 border-white ring-2 ring-sky-200 shrink-0">
-            <img
-              src="/images/upi-scanner.png"
-              alt="Paytm Scanner Preview"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          <div className="space-y-2 text-center sm:text-left">
-            <div className="flex items-center justify-center sm:justify-start gap-1.5">
-              <h4 className="text-sm font-black text-slate-900">
-                {paymentSettings.payeeName}
-              </h4>
-              <BadgeCheck className="w-4 h-4 text-sky-600 fill-sky-600 text-white shrink-0" />
-            </div>
-
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white border border-sky-200 font-mono text-xs font-bold text-sky-900">
-              <span>UPI ID:</span>
-              <span className="text-sky-700">{paymentSettings.upiId}</span>
-            </div>
-
-            <p className="text-xs text-slate-600 leading-relaxed max-w-md">
-              This official scanner card is displayed to buyers when recording stock dispatches and collections. Every payment settles directly into your bank account with zero mediator fees.
-            </p>
-          </div>
-        </div>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!paymentSettings.upiId.trim()) {
-              toastError('UPI ID cannot be empty.');
-              return;
-            }
-            saveCompanyPaymentSettings(paymentSettings);
-            success('UPI Scanner & Payee Settings saved successfully.');
-          }}
-          className="space-y-4 pt-1"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Settlement UPI ID / VPA *
-              </label>
-              <input
-                type="text"
-                required
-                value={paymentSettings.upiId}
-                onChange={(e) =>
-                  setPaymentSettings({ ...paymentSettings, upiId: e.target.value })
-                }
-                placeholder="yelikeyasho@ptyes"
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-sky-600 focus:outline-none"
-              />
-              <p className="text-[11px] text-slate-500 mt-1">
-                All QR scans and mobile UPI deep links route payments directly to this receiving VPA.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Payee Legal / Account Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={paymentSettings.payeeName}
-                onChange={(e) =>
-                  setPaymentSettings({ ...paymentSettings, payeeName: e.target.value })
-                }
-                placeholder="Yelike Yasho Vardhan Venkata Soma S"
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-sky-600 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition active:scale-95"
-            >
-              <Save className="w-4 h-4 text-amber-300" />
-              <span>Save UPI Scanner Settings</span>
-            </button>
-          </div>
-        </form>
-      </div>
-
 
       {/* SQL Migration & Schema Setup Guide */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">

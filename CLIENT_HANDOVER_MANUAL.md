@@ -97,25 +97,4 @@ Every time chilli is moved out of cold storage for sale or processing:
 - **Backups:** Supabase automatically performs continuous daily point-in-time backups.
 - **Row Level Security:** Only authenticated administrators with active admin status can view or modify records.
 
----
-
-### 💳 8. Official Paytm UPI Scanner & Direct Bank Settlement
-The application features direct zero-fee UPI settlement using your official Paytm QR Scanner:
-- **Verified Payee:** **Yelike Yasho Vardhan Venkata Soma S**
-- **Settlement UPI ID:** **`yelikeyasho@ptyes`**
-- **Zero Intermediary Fees:** 100% of the funds go straight into your bank account via standard NPCI UPI rails.
-- **Dual Display Modes:**
-  1. **Official Paytm Standee Scanner:** Displays your official verified QR standee image (`/images/upi-scanner.png`).
-  2. **Pre-Filled Dynamic Amount QR:** Generates a vector QR with the exact bill amount already embedded so customers don't have to type the amount manually.
-- **Mobile 1-Tap Intent:** Quick buttons to open **Paytm**, **PhonePe**, **Google Pay**, or **BHIM** directly on smartphones and tablets.
-- **How to Collect & Record a Payment:**
-  1. Click **Payments & UPI** in the sidebar (or click *Collect UPI* on any lot details screen).
-  2. Enter the customer / party name and the amount to collect.
-  3. Show the QR scanner or tap the mobile app button.
-  4. Once payment arrives in your bank/Paytm app, enter the 12-digit UTR number and click **Record Payment**.
-  5. Click **Print Receipt** to issue a formal certified receipt.
-- **How to Update Details:**
-  1. Go to **System Settings $\rightarrow$ Paytm UPI Scanner & Settlement Payee**.
-  2. Verify or update the UPI ID (`yelikeyasho@ptyes`) and Payee Name as needed.
-
 

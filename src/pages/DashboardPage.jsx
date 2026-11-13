@@ -18,7 +18,6 @@ import {
   RefreshCw,
   Flame,
   ArrowRight,
-  QrCode,
 } from 'lucide-react';
 
 export default function DashboardPage({
@@ -27,7 +26,6 @@ export default function DashboardPage({
   onOpenRecordMovement,
   onOpenUploadBill,
   onOpenAddStorage,
-  onOpenCollectUpi,
 }) {
 
   const [metrics, setMetrics] = useState(null);
@@ -104,16 +102,6 @@ export default function DashboardPage({
             <UploadCloud className="w-4 h-4 text-slate-950" />
             <span>Upload Bill</span>
           </button>
-
-          {onOpenCollectUpi && (
-            <button
-              onClick={onOpenCollectUpi}
-              className="px-3.5 py-2 bg-gradient-to-r from-red-800 to-amber-700 hover:from-red-900 hover:to-amber-800 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition active:scale-95"
-            >
-              <QrCode className="w-4 h-4 text-amber-300" />
-              <span>Collect UPI</span>
-            </button>
-          )}
         </div>
       </div>
 
