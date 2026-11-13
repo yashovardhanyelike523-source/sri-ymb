@@ -146,6 +146,33 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  // Sign up / First-time admin registration handler
+  const signUp = async (email, password, fullName = 'Administrator') => {
+    if (!isConfigured) {
+      throw new Error('Supabase is not configured yet. Please configure credentials in Settings or .env');
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const { data, error } = await supabase.auth.signUp({
+      email: cleanEmail,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (data.user) {
+      await logAuditEvent('USER_SIGNUP', 'auth_users', data.user.id, { email: cleanEmail }, cleanEmail);
+    }
+    return data;
+  };
+
   // Logout handler
   const logout = async () => {
     if (user?.email) {
@@ -190,6 +217,7 @@ export function AuthProvider({ children }) {
         loading,
         isConfigured,
         login,
+        signUp,
         logout,
         resetPassword,
         updatePassword,

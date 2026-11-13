@@ -18,16 +18,22 @@ import {
   KeyRound,
   AlertCircle,
   Settings,
+  UserPlus,
+  LogIn,
+  User,
 } from 'lucide-react';
 
 import Modal from '../components/common/Modal';
 
 export default function LoginPage({ onOpenSettings }) {
-  const { login, resetPassword, isConfigured } = useAuth();
+  const { login, signUp, resetPassword, isConfigured } = useAuth();
   const { success, error: toastError } = useToast();
 
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -37,12 +43,45 @@ export default function LoginPage({ onOpenSettings }) {
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setAuthError('');
 
     if (!email.trim() || !password) {
       setAuthError('Please enter both your administrator email and password.');
+      return;
+    }
+
+    if (isSignUp) {
+      if (password.length < 6) {
+        setAuthError('Password must be at least 6 characters long.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setAuthError('Passwords do not match. Please verify your entries.');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const data = await signUp(email, password, fullName.trim() || 'Administrator');
+        if (data?.session) {
+          success('Administrator account registered and signed in successfully!');
+        } else {
+          success(
+            `Administrator account created for ${email}. You can now sign in with your credentials.`,
+            'Registration Succeeded'
+          );
+          setIsSignUp(false);
+        }
+      } catch (err) {
+        console.error('Sign up error:', err);
+        const msg = err.message || 'Unable to register administrator account. Please check your Supabase settings.';
+        setAuthError(msg);
+        toastError(msg, 'Registration Failed');
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -153,7 +192,62 @@ export default function LoginPage({ onOpenSettings }) {
               </div>
             )}
 
-            <form onSubmit={handleLogin} className="space-y-4">
+            {/* Mode Switcher: Sign In vs Register Admin */}
+            <div className="flex p-1 mb-5 bg-slate-100 rounded-2xl border border-slate-200/80">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(false);
+                  setAuthError('');
+                }}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  !isSignUp
+                    ? 'bg-white text-red-900 shadow-sm shadow-slate-300'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(true);
+                  setAuthError('');
+                }}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  isSignUp
+                    ? 'bg-white text-red-900 shadow-sm shadow-slate-300'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <UserPlus className="w-3.5 h-3.5 text-amber-600" />
+                <span>Register Admin</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Full Name (Sign Up only) */}
+              {isSignUp && (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Full Name / Designation
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="e.g. Yasho Vardhan (Managing Director)"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600 transition bg-slate-50/50 hover:bg-white"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Email Input */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
@@ -179,18 +273,20 @@ export default function LoginPage({ onOpenSettings }) {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Secure Password
+                    {isSignUp ? 'Create Password (min. 6 characters)' : 'Secure Password'}
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setResetEmail(email);
-                      setResetModalOpen(true);
-                    }}
-                    className="text-xs font-semibold text-red-700 hover:text-red-900 transition hover:underline"
-                  >
-                    Forgot Password?
-                  </button>
+                  {!isSignUp && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResetEmail(email);
+                        setResetModalOpen(true);
+                      }}
+                      className="text-xs font-semibold text-red-700 hover:text-red-900 transition hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  )}
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -202,7 +298,7 @@ export default function LoginPage({ onOpenSettings }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    autoComplete="current-password"
+                    autoComplete={isSignUp ? 'new-password' : 'current-password'}
                     className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600 transition bg-slate-50/50 hover:bg-white"
                   />
                   <button
@@ -220,6 +316,29 @@ export default function LoginPage({ onOpenSettings }) {
                 </div>
               </div>
 
+              {/* Confirm Password (Sign Up only) */}
+              {isSignUp && (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••••••"
+                      autoComplete="new-password"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600 transition bg-slate-50/50 hover:bg-white"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -229,11 +348,11 @@ export default function LoginPage({ onOpenSettings }) {
                 {loading ? (
                   <>
                     <span className="w-4 h-4 border-2 border-amber-300 border-t-transparent rounded-full animate-spin" />
-                    <span>Verifying Credentials...</span>
+                    <span>{isSignUp ? 'Creating Administrator Account...' : 'Verifying Credentials...'}</span>
                   </>
                 ) : (
                   <>
-                    <span>Sign In to System</span>
+                    <span>{isSignUp ? 'Register & Access System' : 'Sign In to System'}</span>
                     <ArrowRight className="w-4 h-4 text-amber-300" />
                   </>
                 )}
@@ -243,7 +362,7 @@ export default function LoginPage({ onOpenSettings }) {
             {/* Public Registration Policy Notice */}
             <div className="mt-6 pt-5 border-t border-slate-200/90 text-center">
               <p className="text-[11px] text-slate-500 leading-relaxed">
-                <span className="font-semibold text-slate-700">Strict Enterprise Access:</span> Public registration is closed. Internal access is restricted to authorized partners & managers of Sri YMB Trading Company.
+                <span className="font-semibold text-slate-700">Strict Enterprise Access:</span> {isSignUp ? 'New administrators will be granted full inventory management rights upon registration.' : 'Internal access is restricted to authorized partners & managers of Sri YMB Trading Company.'}
               </p>
             </div>
           </div>
