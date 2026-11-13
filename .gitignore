@@ -24,3 +24,9 @@ dist-ssr
 # Archives and extraneous
 *.zip
 react-food-recipe/
+
+# Netlify state & credentials
+.netlify
+.env
+.env*.local
+
