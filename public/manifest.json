@@ -1,0 +1,19 @@
+{
+  "name": "Sri YMB Trading — Mirchi IMS",
+  "short_name": "Sri YMB",
+  "description": "Sri YMB Trading Company — Wholesale Red Chilli Inventory, Cold Storage & Bill Administration System",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#020617",
+  "theme_color": "#7f1d1d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "appId": "com.sriymb.ims",
+  "appName": "Sri YMB Mirchi IMS",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
