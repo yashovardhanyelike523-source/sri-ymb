@@ -9,8 +9,10 @@ import {
   saveRuntimeCredentials,
   testSupabaseConnection,
 } from '../lib/supabase';
+import { clearAllInventoryData } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import Modal from '../components/common/Modal';
 import {
   Database,
   KeyRound,
@@ -21,12 +23,12 @@ import {
   RefreshCw,
   Terminal,
   ShieldCheck,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 
 export default function SettingsPage() {
-
   const { user, updatePassword } = useAuth();
-
   const { success, error: toastError } = useToast();
 
   const [creds, setCreds] = useState({ url: '', key: '' });
@@ -37,6 +39,11 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
+
+  // Client Handover Zero Reset
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     const current = getSupabaseCredentials();
@@ -89,6 +96,30 @@ export default function SettingsPage() {
   const copySqlPath = () => {
     navigator.clipboard.writeText('supabase/schema.sql');
     success('Path "supabase/schema.sql" copied to clipboard.');
+  };
+
+  const handleResetAllData = async (e) => {
+    e.preventDefault();
+    if (resetConfirmText.trim().toUpperCase() !== 'RESET') {
+      toastError('Please type "RESET" to confirm.');
+      return;
+    }
+
+    try {
+      setResetting(true);
+      await clearAllInventoryData(user?.email);
+      success('All data has been cleared! Every metric and table is reset to 0.', 'System Reset Successful');
+      setResetModalOpen(false);
+      setResetConfirmText('');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
+    } catch (err) {
+      console.error('Reset error:', err);
+      toastError(err.message || 'Failed to reset database tables.', 'Reset Error');
+    } finally {
+      setResetting(false);
+    }
   };
 
   return (
@@ -303,6 +334,105 @@ export default function SettingsPage() {
           </form>
         </div>
       )}
+
+      {/* Client Handover: Reset Every Column & Metric to Zero */}
+      <div className="bg-red-50/70 p-5 rounded-2xl border-2 border-red-200 shadow-xs space-y-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-red-100 text-red-800">
+              <Trash2 className="w-5 h-5 text-red-700" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-red-950 uppercase tracking-tight">
+                Client Handover • Reset All Data to Zero
+              </h3>
+              <p className="text-xs text-red-800/90 mt-0.5">
+                Permanently wipes all demo chilli stock, movements, bills, and warehouses so your client can enter their own live company data.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setResetModalOpen(true)}
+            className="shrink-0 px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded-xl text-xs font-bold shadow-sm transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Reset Database to 0</span>
+          </button>
+        </div>
+
+        <div className="p-3 bg-white/80 rounded-xl border border-red-200/80 text-[11px] text-slate-600 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>
+            This clears demo entries across all tables: <strong className="text-slate-800">Inventory Lots, Stock Ledger, Mandi Bills, and Cold Storages</strong>. Administrator accounts and database structure are preserved.
+          </span>
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={resetModalOpen}
+        onClose={() => setResetModalOpen(false)}
+        title="Confirm Client Handover Reset"
+        subtitle="This action will permanently erase all demo data and reset every metric to zero."
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleResetAllData} className="space-y-4">
+          <div className="p-3.5 bg-red-50 rounded-xl border border-red-200 text-xs text-red-900 flex items-start gap-2.5">
+            <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-bold">Are you preparing this site for client handover?</p>
+              <p className="text-[11px] leading-relaxed text-red-800">
+                All inventory records, stock intake, sales dispatches, and uploaded bills will be deleted. Every metric on the dashboard will read exactly 0.00.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              Type <span className="text-red-700 font-mono">RESET</span> to confirm:
+            </label>
+            <input
+              type="text"
+              required
+              value={resetConfirmText}
+              onChange={(e) => setResetConfirmText(e.target.value)}
+              placeholder="RESET"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-red-600"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setResetModalOpen(false);
+                setResetConfirmText('');
+              }}
+              className="flex-1 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={resetting || resetConfirmText.trim().toUpperCase() !== 'RESET'}
+              className="flex-1 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm disabled:opacity-40 cursor-pointer transition"
+            >
+              {resetting ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Clearing All Data...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Wipe All Data to 0</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

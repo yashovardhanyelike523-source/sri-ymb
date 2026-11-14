@@ -623,6 +623,39 @@ export async function fetchAuditLogs(limit = 100) {
 }
 
 // ==============================================================================
+// RESET & ZERO DATABASE FOR CLIENT HANDOVER
+// ==============================================================================
+export async function clearAllInventoryData(userEmail) {
+  // Delete in reverse order of foreign key dependencies
+  const { error: moveErr } = await supabase
+    .from('stock_movements')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+  if (moveErr) console.warn('Movement wipe note:', moveErr.message);
+
+  const { error: billErr } = await supabase
+    .from('bills')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+  if (billErr) console.warn('Bill wipe note:', billErr.message);
+
+  const { error: lotErr } = await supabase
+    .from('inventory_lots')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+  if (lotErr) console.warn('Lot wipe note:', lotErr.message);
+
+  const { error: storErr } = await supabase
+    .from('cold_storages')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+  if (storErr) console.warn('Storage wipe note:', storErr.message);
+
+  await logAuditEvent('RESET_CLIENT_HANDOVER', 'system', 'all', { action: 'wiped_all_data_to_zero' }, userEmail);
+  return true;
+}
+
+// ==============================================================================
 // DASHBOARD METRICS CALCULATION
 // ==============================================================================
 export async function fetchDashboardMetrics() {
