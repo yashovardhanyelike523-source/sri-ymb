@@ -1,19 +1,69 @@
 {
-  "name": "Sri YMB Trading — Mirchi IMS",
+  "id": "/",
+  "name": "Sri YMB Trading Company",
   "short_name": "Sri YMB",
-  "description": "Sri YMB Trading Company — Wholesale Red Chilli Inventory, Cold Storage & Bill Administration System",
+  "description": "Wholesale Red Chilli Inventory, Cold Storage Preservation & APMC Bill Administration System",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#020617",
   "theme_color": "#7f1d1d",
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "en",
   "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mirchi Inventory",
+      "short_name": "Inventory",
+      "description": "View and manage active red chilli stock lots",
+      "url": "/?tab=inventory",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Stock Movements",
+      "short_name": "Movements",
+      "description": "Log intake and dispatch ledger movements",
+      "url": "/?tab=movements",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Purchase Bills",
+      "short_name": "Bills",
+      "description": "Scan and file APMC Mandi purchase invoices",
+      "url": "/?tab=bills",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
