@@ -37,6 +37,7 @@ export default function App() {
 
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLoggedOutSettings, setShowLoggedOutSettings] = useState(false);
 
   // Cached shared data for modals
   const [coldStorages, setColdStorages] = useState([]);
@@ -83,13 +84,35 @@ export default function App() {
     );
   }
 
-  // Unauthenticated: Display Login Page
+  // Unauthenticated: Display Login Page or Database Setup
   if (!user) {
+    if (showLoggedOutSettings) {
+      return (
+        <div className="min-h-screen bg-slate-950 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+          <div className="w-full max-w-4xl bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
+              <div>
+                <h2 className="text-slate-900 font-black text-lg tracking-tight">Database & System Configuration</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Configure your Supabase connection parameters</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLoggedOutSettings(false)}
+                className="px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer"
+              >
+                ← Return to Sign In
+              </button>
+            </div>
+            <SettingsPage />
+          </div>
+        </div>
+      );
+    }
+
     return (
       <LoginPage
         onOpenSettings={() => {
-          // If unconfigured, allow opening settings
-          setCurrentTab('settings');
+          setShowLoggedOutSettings(true);
         }}
       />
     );

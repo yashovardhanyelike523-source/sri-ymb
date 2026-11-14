@@ -13,12 +13,14 @@ import {
   CHILLI_VARIETIES,
 } from '../lib/units';
 import { VarietyBadge } from '../components/common/Badge';
+import EmptyState from '../components/common/EmptyState';
 import {
   Printer,
   Download,
   Warehouse,
   Flame,
   FileText,
+  Calendar,
 } from 'lucide-react';
 
 
@@ -207,10 +209,22 @@ export default function ReportsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* As Of Date Selector */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-slate-50">
+            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+            <span className="text-slate-500 font-medium">As of:</span>
+            <input
+              type="date"
+              value={asOfDate}
+              onChange={(e) => setAsOfDate(e.target.value)}
+              className="bg-transparent font-bold text-slate-800 focus:outline-none text-xs cursor-pointer"
+            />
+          </div>
+
           {activeSubTab === 'variety' && (
             <button
               onClick={exportVarietyCSV}
-              className="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs"
+              className="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs cursor-pointer"
             >
               <Download className="w-4 h-4 text-slate-600" />
               <span>Export Variety CSV</span>
@@ -220,7 +234,7 @@ export default function ReportsPage() {
           {activeSubTab === 'storage' && (
             <button
               onClick={exportStorageCSV}
-              className="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs"
+              className="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs cursor-pointer"
             >
               <Download className="w-4 h-4 text-slate-600" />
               <span>Export Storage CSV</span>
@@ -229,7 +243,7 @@ export default function ReportsPage() {
 
           <button
             onClick={handlePrint}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition active:scale-95"
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
           >
             <Printer className="w-4 h-4 text-amber-300" />
             <span>Print Report</span>
@@ -276,10 +290,25 @@ export default function ReportsPage() {
         </button>
       </div>
 
+      {/* Loading Indicator */}
+      {loading && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-xs text-slate-500 shadow-xs">
+          <span className="inline-block w-6 h-6 border-2 border-red-700 border-t-transparent rounded-full animate-spin mb-2" />
+          <p>Compiling inventory reports & valuation schedule...</p>
+        </div>
+      )}
+
       {/* TAB 1: BY CHILLI VARIETY */}
-      {activeSubTab === 'variety' && (
+      {!loading && activeSubTab === 'variety' && (
         <div className="no-print space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          {varietySummary.length === 0 ? (
+            <EmptyState
+              title="No active chilli stock recorded"
+              description="Add your first lot in the Mirchi Inventory section to view cultivar distribution analytics."
+              icon={Flame}
+            />
+          ) : (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs whitespace-nowrap">
                 <thead className="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
@@ -357,13 +386,21 @@ export default function ReportsPage() {
               </table>
             </div>
           </div>
+          )}
         </div>
       )}
 
       {/* TAB 2: BY COLD STORAGE */}
-      {activeSubTab === 'storage' && (
+      {!loading && activeSubTab === 'storage' && (
         <div className="no-print space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          {storageSummary.length === 0 ? (
+            <EmptyState
+              title="No cold storages registered"
+              description="Register warehouse facilities in the Cold Storage section to view capacity utilization."
+              icon={Warehouse}
+            />
+          ) : (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs whitespace-nowrap">
                 <thead className="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
@@ -422,6 +459,7 @@ export default function ReportsPage() {
               </table>
             </div>
           </div>
+          )}
         </div>
       )}
 

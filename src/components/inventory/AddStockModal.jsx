@@ -212,13 +212,22 @@ export default function AddStockModal({ isOpen, onClose, coldStorages = [], onSu
               required
               className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-red-600 focus:outline-none bg-white"
             >
-              <option value="">Select Cold Storage...</option>
+              {coldStorages.length === 0 ? (
+                <option value="">No cold storage registered yet</option>
+              ) : (
+                <option value="">Select Cold Storage...</option>
+              )}
               {coldStorages.map((cs) => (
                 <option key={cs.id} value={cs.id}>
                   {cs.name} ({cs.location})
                 </option>
               ))}
             </select>
+            {coldStorages.length === 0 && (
+              <p className="text-[11px] text-amber-700 mt-1 font-medium">
+                ⚠️ Register a Cold Storage facility first in the Cold Storage section.
+              </p>
+            )}
           </div>
 
           <div>
