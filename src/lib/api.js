@@ -279,20 +279,9 @@ export async function archiveInventoryLot(id, isArchived, userEmail) {
 }
 
 export async function deleteInventoryLot(id, userEmail) {
-  // Check if there are movements other than initial IN
-  const { data: movements } = await supabase
-    .from('stock_movements')
-    .select('id, movement_type')
-    .eq('lot_id', id);
-
-  if (movements && movements.some((m) => m.movement_type === 'OUT')) {
-    throw new Error(
-      'Cannot delete this lot because it has dispatch/removal movements recorded. Please archive the lot instead to preserve ledger integrity.'
-    );
-  }
-
-  // Delete movements associated
-  await supabase.from('stock_movements').delete().eq('lot_id', id);
+  // Delete all stock movements associated with this lot
+  const { error: moveErr } = await supabase.from('stock_movements').delete().eq('lot_id', id);
+  if (moveErr) console.warn('Movement delete note:', moveErr.message);
 
   const { error } = await supabase.from('inventory_lots').delete().eq('id', id);
   if (error) throw error;
